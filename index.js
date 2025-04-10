@@ -116,3 +116,43 @@ app.use((err, req, res, next) => {
 app.listen(port, () => {
   console.log(`Server listening on port: ${port}.`);
 });
+
+const express = require('express');
+const router = express.Router();
+
+const comments = require('../data/comments');
+const users = require('../data/users');
+const posts = require('../data/posts');
+
+// GET /comments
+router.get('/', (req, res) => {
+  res.json(comments);
+});
+
+// POST /comments
+router.post('/', (req, res) => {
+  const { userId, postId, body } = req.body;
+
+  const userExists = users.some(user => user.id === userId);
+  const postExists = posts.some(post => post.id === postId);
+
+  if (!userExists || !postExists) {
+    return res.status(400).send("Invalid userId or postId.");
+  }
+
+  const newComment = {
+    id: comments.length + 1,
+    userId,
+    postId,
+    body,
+  };
+
+  comments.push(newComment);
+  res.status(201).json(newComment);
+});
+
+module.exports = router;
+
+app.listen(3000, () => {
+  console.log('Server is running on http://localhost:3000');
+});
